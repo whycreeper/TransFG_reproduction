@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Classification Demo</title>
+    <!-- 引入 Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            padding-top: 50px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        .result-card {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .uploaded-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .spinner {
+            display: none;
+            margin-top: 20px;
+        }
+        .placeholder {
+            max-width: 100%;
+            height: auto;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <h1 class="mb-4">TransFG Demo</h1>
+        <div class="card p-4 shadow-sm">
+            <form id="uploadForm" action="/predict" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="fileInput" class="form-label">Upload an Image:</label>
+                    <input type="file" class="form-control" id="fileInput" name="file" required>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">Predict</button>
+                    <button type="button" id="resetButton" class="btn btn-secondary">Reset</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 等待画面 -->
+        <div id="loading" class="spinner text-center mt-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Processing...</span>
+            </div>
+            <p>Recognizing Image... Please wait.</p>
+        </div>
+
+        <!-- 显示结果 -->
+        <div class="result-card mt-4 shadow-sm" id="resultCard">
+            <h2>Prediction: <span class="text-primary" id="predictionText">
+                {% if prediction is not none %}
+                    {{ prediction }}
+                {% else %}
+                    <span class="text-muted">No prediction yet</span>
+                {% endif %}
+            </span></h2>
+            <!-- 默认显示占位图片或生成的图片 -->
+            <img 
+                src="{% if image_path is not none %}{{ image_path }}{% else %}/static/placeholder.png{% endif %}" 
+                alt="{% if image_path is not none %}Generated Image{% else %}Placeholder Image{% endif %}" 
+                class="uploaded-image"
+                id="displayImage">
+        </div>
+    </div>
+
+    <!-- 引入 Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const loadingSpinner = document.getElementById('loading');
+        const resultCard = document.getElementById('resultCard');
+
+        // 监听表单提交事件
+        form.addEventListener('submit', function () {
+            // 显示加载动画
+            loadingSpinner.style.display = 'block';
+
+            // 隐藏结果卡片
+            if (resultCard) {
+                resultCard.style.display = 'none';
+            }
+        });
+
+        // Reset 按钮功能
+        document.getElementById('resetButton').addEventListener('click', function () {
+            // 重置表单
+            form.reset();
+
+            // 隐藏加载动画
+            loadingSpinner.style.display = 'none';
+
+            // 显示占位图片
+            const displayImage = document.getElementById('displayImage');
+            if (displayImage) {
+                displayImage.src = '/static/placeholder.png';
+                displayImage.alt = 'Placeholder Image';
+            }
+
+            // 隐藏结果卡片
+            if (resultCard) {
+                resultCard.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
